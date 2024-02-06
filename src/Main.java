@@ -23,6 +23,7 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
     private static final Font xpFont = new Font("Arial", Font.BOLD, 24);
     private static final Color xpColor = new Color(224, 141, 24);
     private static final Color xpColor2 = new Color(133, 112, 255);
+    private static final BasicStroke bs = new BasicStroke(4);
     private boolean isRunning = false;
     private int randomNumber;
     private final BufferedImage logoImage;
@@ -82,8 +83,11 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
 
     @Override
     public void onPaint(Graphics2D g){
+        g.setColor(xpColor2);
+        g.setStroke(bs);
+        g.drawRect(0, 336, 520 ,164);
         g.setColor(Color.black);
-        g.fillRect(0, 338, 520 ,162);
+        g.fillRect(3, 339, 517 ,160);
         g.setFont(xpFont);
         g.setColor(xpColor2);
         g.drawString(String.format("%d", SkillTracker.getGainedExperiencePerHour(Skill.ATTACK)), 280, 380);
