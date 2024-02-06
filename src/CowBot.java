@@ -24,7 +24,9 @@ public class CowBot {
     private static final Area BANK_AREA = new Area(3210, 3220, 3207, 3217, 2);
 
     private static final String[] FOOD_NAMES = {"Trout", "Salmon", "Swordfish", "Tuna", "Lobster"};
-    private static final int MIN_START_FOOD = 4;
+    private static final int MIN_START_FOOD = 8;
+    private static final int MIN_RUN_ENERGY = 20;
+    private static final int MIN_HEALTH_PERCENTAGE = 20;
 
     private boolean isRunning = false;
     private boolean isBanking = false;
@@ -39,7 +41,7 @@ public class CowBot {
             //check food before script start
             CheckFood();
             //if less food than MIN_START_FOOD and player isn't at the cows yet, than go bank for food.
-            if(foodLeft <= MIN_START_FOOD && !COW_AREA.contains(localPlayer)){
+            if(foodLeft < MIN_START_FOOD && !COW_AREA.contains(localPlayer)){
                 isBanking = true;
             }
             //set script to running.
@@ -79,10 +81,8 @@ public class CowBot {
         NPC cow = NPCs.closest(n -> (n.getName().equals("Cow") || n.getName().equals("Cow calf"))
                 && !n.isInCombat() && COW_AREA.contains(n) && n.getHealthPercent() != 0);
         // If the player is not in combat and not moving, interact with the cow
-        Logger.log(Players.getLocal().isMoving() + " Player moving");
         if (!Players.getLocal().isInCombat()) {
             cow.interact("Attack");
-            Logger.log(Players.getLocal().isInCombat() + " Player combat");
             Sleep.sleepUntil(() -> Players.getLocal().isInCombat(), 2000);
         }
     }
@@ -93,7 +93,7 @@ public class CowBot {
         int health = localPlayer.getHealthPercent();
 
         // If the health is less than or equal to 20%, eat food if available
-        if(health <= 20){
+        if(health <= MIN_HEALTH_PERCENTAGE){
             // If there is food left in the inventory, eat it
             if(foodLeft > 0){
                 // Interact with any item that matches the FOOD_NAMES array
@@ -156,7 +156,7 @@ public class CowBot {
     }
 
     void ToggleRun(){
-        if(Walking.getRunEnergy() >= 20 && !Walking.isRunEnabled()){
+        if(Walking.getRunEnergy() >= MIN_RUN_ENERGY && !Walking.isRunEnabled()){
             Walking.toggleRun();
         }
     }
