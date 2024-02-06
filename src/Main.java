@@ -1,6 +1,7 @@
 import org.dreambot.api.data.GameState;
 import org.dreambot.api.methods.skills.Skill;
 import org.dreambot.api.methods.skills.SkillTracker;
+import org.dreambot.api.randoms.BreakSolver;
 import org.dreambot.api.script.AbstractScript;
 import org.dreambot.api.script.Category;
 import org.dreambot.api.script.ScriptManifest;

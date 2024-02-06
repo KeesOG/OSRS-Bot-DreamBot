@@ -9,8 +9,8 @@ import org.dreambot.api.utilities.Logger;
 import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
-import sun.rmi.runtime.Log;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -19,7 +19,8 @@ import static org.dreambot.api.utilities.Sleep.sleepUntil;
 public class CowBot {
     private static final Area COW_AREA = new Area(3265, 3296, 3242, 3283);
     private static final Area BANK_AREA = new Area(3210, 3220, 3207, 3217, 2);
-    private static final String[] FOOD_NAMES = {"Trout", "Salmon", "Swordfish", "Tuna", "Lobster"};
+    private static final String[] FOOD_NAMES = {"Trout", "Salmon", "Swordfish", "Tuna", "Lobster", "Meat pie",
+    "Half a meat pie"};
     private static final int MIN_START_FOOD = 8;
     private static final int MIN_RUN_ENERGY = 20;
     private static final int MIN_HEALTH_PERCENTAGE = 20;
@@ -62,7 +63,6 @@ public class CowBot {
         //If player isn't banking. Attack cow.
         if(!isBanking && !isLooting)
         {
-            Logger.log("AttackCow()");
             AttackCow();
         }
 
@@ -107,6 +107,9 @@ public class CowBot {
                 Inventory.interact(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals));
                 // Wait until the inventory contains a twisted bow or 1000 milliseconds have passed
                 sleepUntil(()-> Inventory.contains("Twisted bow"), 2000);
+                if(Inventory.contains("Pie dish")){
+                    Inventory.dropAll("Pie dish");
+                }
                 // Check the food left in the inventory
                 CheckFood();
             }
@@ -144,7 +147,11 @@ public class CowBot {
             // If the bank has any food items, withdraw 28 of them
             if(Bank.contains(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals)))
             {
-                Bank.withdraw(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals), 28);
+                while(!Inventory.isFull() && Bank.contains(item -> Arrays.stream(FOOD_NAMES)
+                        .anyMatch(item.getName()::equals))) {
+                    Bank.withdraw(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals), 28);
+                }
+                isBanking = false;
             }
             else{
                 Sleep.sleep(10000);
@@ -152,7 +159,7 @@ public class CowBot {
             }
             // Check the food amount and set the banking flag to false
             CheckFood();
-            isBanking = false;
+
         }
     }
 
