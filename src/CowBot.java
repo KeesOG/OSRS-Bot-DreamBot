@@ -6,6 +6,7 @@ import org.dreambot.api.methods.item.GroundItems;
 import org.dreambot.api.methods.map.Area;
 import org.dreambot.api.methods.walking.impl.Walking;
 import org.dreambot.api.utilities.Logger;
+import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.interactive.Player;
 import org.dreambot.api.wrappers.items.GroundItem;
@@ -23,11 +24,12 @@ public class CowBot {
     private static final Area BANK_AREA = new Area(3210, 3220, 3207, 3217, 2);
 
     private static final String[] FOOD_NAMES = {"Trout", "Salmon", "Swordfish", "Tuna", "Lobster"};
+    private static final int MIN_START_FOOD = 4;
 
     private boolean isRunning = false;
     private boolean isBanking = false;
     private int foodLeft = 0;
-    private static final int MIN_START_FOOD = 4;
+
     private Player localPlayer = Players.getLocal();
 
 
@@ -36,7 +38,7 @@ public class CowBot {
         if(!isRunning){
             //check food before script start
             CheckFood();
-            //if less food than MIN_START_FOOD and player isn't yet at the cows yet, than go bank for food.
+            //if less food than MIN_START_FOOD and player isn't at the cows yet, than go bank for food.
             if(foodLeft <= MIN_START_FOOD && !COW_AREA.contains(localPlayer)){
                 isBanking = true;
             }
@@ -45,8 +47,9 @@ public class CowBot {
         }
         //Check health each game update.
         CheckHealth();
+        ToggleRun();
 
-        //If isBanking. Go grab food.
+        //If isBanking is true. Go grab food.
         if(isBanking){
             GrabFoodBank();
         }
@@ -73,10 +76,14 @@ public class CowBot {
         }
 
         // Find the closest cow or cow calf that is not in combat
-        NPC cow = NPCs.closest(n -> (n.getName().equals("Cow") || n.getName().equals("Cow calf")) && !n.isInCombat());
+        NPC cow = NPCs.closest(n -> (n.getName().equals("Cow") || n.getName().equals("Cow calf"))
+                && !n.isInCombat() && COW_AREA.contains(n) && n.getHealthPercent() != 0);
         // If the player is not in combat and not moving, interact with the cow
-        if (!Players.getLocal().isAnimating() && Players.getLocal().isStandingStill()) {
+        Logger.log(Players.getLocal().isMoving() + " Player moving");
+        if (!Players.getLocal().isInCombat()) {
             cow.interact("Attack");
+            Logger.log(Players.getLocal().isInCombat() + " Player combat");
+            Sleep.sleepUntil(() -> Players.getLocal().isInCombat(), 2000);
         }
     }
 
@@ -144,6 +151,13 @@ public class CowBot {
         // If there is a cowhide, interact with it to take it
         if(item != null) {
             item.interact("Take");
+            Sleep.sleepUntil(Inventory::isFull, 2000);
+        }
+    }
+
+    void ToggleRun(){
+        if(Walking.getRunEnergy() >= 20 && !Walking.isRunEnabled()){
+            Walking.toggleRun();
         }
     }
 
