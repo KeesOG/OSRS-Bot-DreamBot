@@ -22,7 +22,9 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
     CowBot cowBot = new CowBot();
     private static final Font xpFont = new Font("Arial", Font.BOLD, 24);
     private static final Color xpColor = new Color(224, 141, 24);
+    private static final Color xpColor2 = new Color(133, 112, 255);
     private boolean isRunning = false;
+    private int randomNumber;
     private final BufferedImage logoImage;
     {
         try
@@ -38,7 +40,9 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
     @Override
     public void onStart()
     {
+        randomNumber = 2500 + random.nextInt(3500);
         Logger.log("Started.");
+        Logger.log("Random number: " + randomNumber);
     }
 
     @Override
@@ -60,6 +64,12 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
             }
             return 1000;
         }
+        if(SkillTracker.getGainedExperience(Skill.ATTACK) >= randomNumber)
+        {
+            cowBot.isBanking = true;
+            SkillTracker.reset(Skill.ATTACK);
+            randomNumber = 2500 + random.nextInt(3500);
+        }
         cowBot.StartScript();
         return 500 + random.nextInt(1000);
     }
@@ -75,13 +85,17 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
         g.setColor(Color.black);
         g.fillRect(0, 338, 520 ,162);
         g.setFont(xpFont);
-        g.setColor(xpColor);
+        g.setColor(xpColor2);
         g.drawString(String.format("%d", SkillTracker.getGainedExperiencePerHour(Skill.ATTACK)), 280, 380);
         g.drawString("Attack xp/hr: ", 50, 380);
         g.drawString(String.format("%d", SkillTracker.getGainedExperiencePerHour(Skill.STRENGTH)), 280, 410);
         g.drawString("Strength xp/hr: ", 50, 410);
         g.drawString(String.format("%d", SkillTracker.getGainedExperiencePerHour(Skill.DEFENCE)), 280, 440);
         g.drawString("Defence xp/hr: ", 50, 440);
+        g.drawString(String.format("%d", SkillTracker.getGainedExperience(Skill.ATTACK)), 280, 470);
+        g.drawString("Xp gained: ", 50, 470);
         g.drawImage(logoImage, 345, 338, 170, 156, null);
     }
+
+
 }

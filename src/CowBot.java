@@ -25,7 +25,7 @@ public class CowBot {
     private static final int MIN_RUN_ENERGY = 20;
     private static final int MIN_HEALTH_PERCENTAGE = 20;
     private boolean isRunning = false;
-    private boolean isBanking = false;
+    public boolean isBanking = false;
     private boolean isLooting = false;
     private int foodLeft = 0;
 
