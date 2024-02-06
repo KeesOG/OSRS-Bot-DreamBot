@@ -9,6 +9,7 @@ import org.dreambot.api.utilities.Logger;
 import org.dreambot.api.utilities.Sleep;
 import org.dreambot.api.wrappers.interactive.NPC;
 import org.dreambot.api.wrappers.items.GroundItem;
+import sun.rmi.runtime.Log;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -24,6 +25,7 @@ public class CowBot {
     private static final int MIN_HEALTH_PERCENTAGE = 20;
     private boolean isRunning = false;
     private boolean isBanking = false;
+    private boolean isLooting = false;
     private int foodLeft = 0;
 
     public void StartScript()
@@ -48,20 +50,23 @@ public class CowBot {
         //If isBanking is true. Go grab food.
         if(isBanking)
         {
+            Logger.log("GrabFoodBank()");
             GrabFoodBank();
+        }
+        if(!Players.getLocal().isAnimating() && !Inventory.isFull() && checkCowhidesGround() && !isLooting)
+        {
+            Logger.log(checkCowhidesGround());
+            Logger.log("GrabCowhides()");
         }
 
         //If player isn't banking. Attack cow.
-        if(!isBanking)
+        if(!isBanking && !isLooting)
         {
+            Logger.log("AttackCow()");
             AttackCow();
         }
 
-        //If player is idle and inventory has free space. Grab cowhide.
-        if(!Players.getLocal().isAnimating() && !Inventory.isFull())
-        {
-            GrabCowhides();
-        }
+
     }
 
     // This method makes the player attack a cow or a cow calf in the COW_AREA
@@ -101,7 +106,7 @@ public class CowBot {
                 // Interact with any item that matches the FOOD_NAMES array
                 Inventory.interact(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals));
                 // Wait until the inventory contains a twisted bow or 1000 milliseconds have passed
-                sleepUntil(()-> Inventory.contains("Twisted bow"), 1000);
+                sleepUntil(()-> Inventory.contains("Twisted bow"), 2000);
                 // Check the food left in the inventory
                 CheckFood();
             }
@@ -141,24 +146,45 @@ public class CowBot {
             {
                 Bank.withdraw(item -> Arrays.stream(FOOD_NAMES).anyMatch(item.getName()::equals), 28);
             }
+            else{
+                Sleep.sleep(10000);
+                Logger.log("No more food left.");
+            }
             // Check the food amount and set the banking flag to false
             CheckFood();
             isBanking = false;
         }
     }
 
-    void GrabCowhides()
-    {
-        // Find the closest cowhide within 2 tiles of the player
+    boolean checkCowhidesGround(){
         GroundItem item = GroundItems.closest(groundItem -> Players.getLocal().getSurroundingArea(2)
                 .contains(groundItem) && groundItem.getName()
                 .equals("Cowhide"));
-        // If there is a cowhide, interact with it to take it
         if(item != null)
         {
-            item.interact("Take");
-            Sleep.sleepUntil(Inventory::isFull, 2000);
+            isLooting = true;
+            Logger.log("Not Null");
+            GrabCowhides(item);
+            return true;
         }
+        else
+        {
+            return false;
+        }
+    }
+
+    void GrabCowhides(GroundItem cowHide)
+    {
+        // Find the closest cowhide within 2 tiles of the player
+
+        // If there is a cowhide, interact with it to take it
+        if(cowHide != null)
+        {
+            cowHide.interact("Take");
+            Sleep.sleepUntil(Inventory::isFull, 2000);
+            isLooting = false;
+        }
+
     }
 
     void ToggleRun()
