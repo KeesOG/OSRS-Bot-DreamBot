@@ -41,7 +41,7 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
     @Override
     public void onStart()
     {
-        randomNumber = 2500 + random.nextInt(3500);
+        randomNumber = 5000 + random.nextInt(15000);
         Logger.log("Started.");
         Logger.log("Random number: " + randomNumber);
     }
@@ -69,7 +69,7 @@ public class Main extends AbstractScript implements PaintListener, ExperienceLis
         {
             cowBot.isBanking = true;
             SkillTracker.reset(Skill.ATTACK);
-            randomNumber = 2500 + random.nextInt(3500);
+            randomNumber = 5000 + random.nextInt(15000);
         }
         cowBot.StartScript();
         return 500 + random.nextInt(1000);
